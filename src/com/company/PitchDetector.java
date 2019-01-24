@@ -1,0 +1,186 @@
+package com.company;
+
+import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.AudioEvent;
+import be.tarsos.dsp.io.jvm.AudioDispatcherFactory;
+import be.tarsos.dsp.io.jvm.JVMAudioInputStream;
+import be.tarsos.dsp.pitch.PitchDetectionHandler;
+import be.tarsos.dsp.pitch.PitchDetectionResult;
+import be.tarsos.dsp.pitch.PitchProcessor;
+
+import javax.sound.sampled.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class PitchDetector implements PitchDetectionHandler {
+
+    private AudioDispatcher dispatcher;
+    private Mixer currentMixer;
+
+    private PitchProcessor.PitchEstimationAlgorithm algo;
+
+    public static void println(String message) {
+        System.out.println(message);
+
+    }
+    public PitchDetector(byte[] audioBuffer) throws LineUnavailableException, UnsupportedAudioFileException {
+        println("Starting Pitch Detector");
+        Mixer.Info[] mixers=AudioSystem.getMixerInfo();
+        algo = PitchProcessor.PitchEstimationAlgorithm.DYNAMIC_WAVELET;
+
+        processAudioBuffer(audioBuffer);
+
+    }
+    public PitchDetector() throws LineUnavailableException, UnsupportedAudioFileException {
+        println("Starting Pitch Detector");
+        Mixer.Info[] mixers=AudioSystem.getMixerInfo();
+        algo = PitchProcessor.PitchEstimationAlgorithm.YIN;
+
+        processRecording(AudioSystem.getMixer(mixers[0]));
+    }
+
+
+
+    private void processRecording(Mixer mixer) throws LineUnavailableException,
+            UnsupportedAudioFileException {
+
+        if(dispatcher!= null){
+            dispatcher.stop();
+        }
+        currentMixer = mixer;
+
+        float sampleRate = 44100;
+        int bufferSize = 1024;
+        int overlap = 0;
+        println("Started listening with"+ mixer.getMixerInfo().getName() + "\n");
+
+        final AudioFormat format = new AudioFormat(sampleRate, 16, 1, true,
+                true);
+        final DataLine.Info dataLineInfo = new DataLine.Info(
+                TargetDataLine.class, format);
+        TargetDataLine line;
+        line = (TargetDataLine) mixer.getLine(dataLineInfo);
+        final int numberOfSamples = bufferSize;
+        line.open(format, numberOfSamples);
+        line.start();
+        final AudioInputStream stream = new AudioInputStream(line);
+
+        JVMAudioInputStream audioStream = new JVMAudioInputStream(stream);
+        // create a new dispatcher
+        dispatcher = new AudioDispatcher(audioStream, bufferSize,
+                overlap);
+
+        // add a processor
+        dispatcher.addAudioProcessor(new PitchProcessor(algo, sampleRate, bufferSize, this));
+
+        new Thread(dispatcher,"Audio dispatching").start();
+    }
+
+    private void processAudioBuffer(byte[] audioBuffer) throws LineUnavailableException,
+            UnsupportedAudioFileException {
+
+        if(dispatcher!= null){
+            dispatcher.stop();
+        }
+
+        float sampleRate = 44100;
+        int bufferSize = 512;
+        int overlap = 0;
+        println("Started listening with");
+
+        final AudioFormat format = new AudioFormat(sampleRate, 16, 1, true,
+                true);
+        // create a new dispatcher
+        dispatcher = AudioDispatcherFactory.fromByteArray(audioBuffer,format,bufferSize,overlap);
+
+        // add a processor
+        dispatcher.addAudioProcessor(new PitchProcessor(algo, sampleRate, bufferSize, this));
+
+        new Thread(dispatcher,"Audio dispatching").start();
+    }
+//    private void detectFromMic(byte[] soundBuffer, Mixer mixer) throws LineUnavailableException,
+//            UnsupportedAudioFileException {
+//
+//        if(dispatcher!= null){
+//            dispatcher.stop();
+//        }
+//        currentMixer = mixer;
+//
+//        float sampleRate = 44100;
+//        int bufferSize = 1024;
+//        int overlap = 0;
+//        println("Started listening with"+ mixer.getMixerInfo().getName() + "\n");
+//
+//        final AudioFormat format = new AudioFormat(sampleRate, 16, 1, true,
+//                true);
+//        final DataLine.Info dataLineInfo = new DataLine.Info(
+//                TargetDataLine.class, format);
+//        TargetDataLine line;
+//        line = (TargetDataLine) mixer.getLine(dataLineInfo);
+//        final int numberOfSamples = bufferSize;
+//        line.open(format, numberOfSamples);
+//        line.start();
+//        final AudioInputStream stream = new AudioInputStream(line);
+//
+//        JVMAudioInputStream audioStream = new JVMAudioInputStream(stream);
+//        // create a new dispatcher
+//        dispatcher = new AudioDispatcher(audioStream, bufferSize,
+//                overlap);
+//
+//        // add a processor
+//        dispatcher.addAudioProcessor(new PitchProcessor(algo, sampleRate, bufferSize, this));
+//
+//        new Thread(dispatcher,"Audio dispatching").start();
+//    }
+
+    public static void main(String... strings) throws LineUnavailableException, UnsupportedAudioFileException {
+//        PitchGenerator generator = new PitchGenerator();
+//        List<Pitch> pitchList = new ArrayList<Pitch>();
+//        pitchList.add(Pitch.fromName("E4"));
+//        pitchList.add(Pitch.fromName("Ef4"));
+//        pitchList.add(Pitch.fromName("E4"));
+//        pitchList.add(Pitch.fromName("Ef4"));
+//        pitchList.add(Pitch.fromName("E4"));
+//        pitchList.add(Pitch.fromName("B3"));
+//        pitchList.add(Pitch.fromName("D4"));
+//        pitchList.add(Pitch.fromName("C4"));
+//        pitchList.add(Pitch.fromName("A3"));
+//
+//        byte[] seq=generator.createPitchSequence(500,0.9, pitchList.toArray(new Pitch[pitchList.size()])) ;
+        PitchDetector pitchDetector = new PitchDetector();
+//        println("Printing mixers:");
+//        int i=0;
+//        for (Mixer.Info info : mixers) {
+//            println("Name["+ i++ + "]:"+info.getName() +"\n\t"
+//            + "Description: "+info.getDescription()+ "\n\t"
+//            + "Vendor: "+ info.getVendor()+ "\n\t"
+//            + "Version: "+info.getVersion()+"\n");
+//        }
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("4. exit");
+            int c = sc.nextInt();
+            if (c == 4)
+                break;
+        }
+        pitchDetector.dispatcher.stop();
+
+        System.out.print("Done");
+    }
+
+
+    @Override
+    public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
+        if(pitchDetectionResult.getPitch() != -1){
+            double timeStamp = audioEvent.getTimeStamp();
+            float pitch = pitchDetectionResult.getPitch();
+            float probability = pitchDetectionResult.getProbability();
+            double rms = audioEvent.getRMS() * 100;
+//            String message = String.format("Pitch detected at %.2fs: %.2fHz ( %.2f probability, RMS: %.5f )\n", timeStamp,pitch,probability,rms);
+            String message = String.format("Pitch detected at %.2fs: %s (%.2f probability)\n", timeStamp, Pitch.fromFrequency(pitch).getName(), probability);
+            println(message);
+        }
+    }
+}
