@@ -1,4 +1,11 @@
 package com.company;
+
+
+/**
+ * This class contains the pitch frequency for the 88 keyes on the piano
+ *
+ * @author Donovan J. Wilder
+ */
 public enum Pitch {
     C8(88, 4186.009d, "C8", ""),
     B7(87, 3951.066d, "B7", ""),
@@ -89,18 +96,34 @@ public enum Pitch {
     As0(2, 29.13524d, "As0", "Bf0"),
     A0(1, 27.50000d, "A0", "");
 
+    /**
+     *
+     * @return returns the Key number grom a piano as the pitch
+     */
     public int getKeyNumber() {
         return keyNumber;
     }
 
+    /**
+     *
+     * @return returns the frequency of the pitch
+     */
     public double getFrequency() {
         return frequency;
     }
 
+    /**
+     *
+     * @return returns the name of the pitch if it has 2 names it returns the one thats sharp
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     *
+     * @return returns the second name of the pitch if it has 2 names  it returns the one thats flat if itha no flats it returns ""
+     */
     public String getSecondName() {
         return secondName;
     }
@@ -110,13 +133,17 @@ public enum Pitch {
     private final String name;
     private final String secondName;
 
-    Pitch(int keyNumber, double frequency, String name, String secondName) {
+    private Pitch(int keyNumber, double frequency, String name, String secondName) {
         this.keyNumber = keyNumber;
         this.frequency = frequency;
         this.name = name;
         this.secondName = secondName;
     }
 
+    /**
+     *
+     * @return returns  the names  key number and frequency of a string
+     */
     @Override
     public String toString() {
         String names= name;
@@ -126,6 +153,11 @@ public enum Pitch {
         return "names: "+ names+ "\tkeyNumber: "+keyNumber+ "\tfrequency: "+ frequency;
     }
 
+    /**
+     * Return a Pitch from the Key number
+     * @param keyNumber The key number from a piano
+     * @return a Pitch
+     */
     public static Pitch fromKeyNumber(int keyNumber) {
         switch (keyNumber) {
             case 88:
@@ -310,6 +342,11 @@ public enum Pitch {
 
     }
 
+    /**
+     * Return a Pitch from the frequency
+     * @param frequency The frequency of a pitch
+     * @return a Pitch
+     */
     public static Pitch fromFrequency(double frequency) {
         for (Pitch pitch : Pitch.values()) {
             if (frequency >= pitch.frequency) {
@@ -319,6 +356,11 @@ public enum Pitch {
         return null;
     }
 
+    /**
+     * Return a Pitch from the name whether it is the first or second name.
+     * @param name the name of the pitch
+     * @return a Pitch
+     */
     public static Pitch fromName(String name) {
         switch (name) {
             case "C8":
