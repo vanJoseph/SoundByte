@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * This class uses the Tarsos DSP library to detect frequencies from a sound buffer or from a microphone.
+ */
 public class PitchDetector implements PitchDetectionHandler {
 
     private AudioDispatcher dispatcher;
@@ -37,7 +40,8 @@ public class PitchDetector implements PitchDetectionHandler {
         Mixer.Info[] mixers=AudioSystem.getMixerInfo();
         algo = PitchProcessor.PitchEstimationAlgorithm.YIN;
 
-        processRecording(AudioSystem.getMixer(mixers[0]));
+        detectFromMic(AudioSystem.getMixer(mixers[0]));
+       // processRecording(AudioSystem.getMixer(mixers[0]));
     }
 
 
@@ -99,40 +103,41 @@ public class PitchDetector implements PitchDetectionHandler {
 
         new Thread(dispatcher,"Audio dispatching").start();
     }
-//    private void detectFromMic(byte[] soundBuffer, Mixer mixer) throws LineUnavailableException,
-//            UnsupportedAudioFileException {
-//
-//        if(dispatcher!= null){
-//            dispatcher.stop();
-//        }
-//        currentMixer = mixer;
-//
-//        float sampleRate = 44100;
-//        int bufferSize = 1024;
-//        int overlap = 0;
-//        println("Started listening with"+ mixer.getMixerInfo().getName() + "\n");
-//
-//        final AudioFormat format = new AudioFormat(sampleRate, 16, 1, true,
-//                true);
-//        final DataLine.Info dataLineInfo = new DataLine.Info(
-//                TargetDataLine.class, format);
-//        TargetDataLine line;
-//        line = (TargetDataLine) mixer.getLine(dataLineInfo);
-//        final int numberOfSamples = bufferSize;
-//        line.open(format, numberOfSamples);
-//        line.start();
-//        final AudioInputStream stream = new AudioInputStream(line);
-//
-//        JVMAudioInputStream audioStream = new JVMAudioInputStream(stream);
-//        // create a new dispatcher
-//        dispatcher = new AudioDispatcher(audioStream, bufferSize,
-//                overlap);
-//
-//        // add a processor
-//        dispatcher.addAudioProcessor(new PitchProcessor(algo, sampleRate, bufferSize, this));
-//
-//        new Thread(dispatcher,"Audio dispatching").start();
-//    }
+    private void detectFromMic(Mixer mixer) throws LineUnavailableException {
+
+        if(dispatcher!= null){
+            dispatcher.stop();
+        }
+        currentMixer = mixer;
+
+        float sampleRate = 44100;
+        int bufferSize = 1024;
+
+
+        int overlap = 0;
+        println("Started listening with"+ mixer.getMixerInfo().getName() + "\n");
+
+        final AudioFormat format = new AudioFormat(sampleRate, 16, 1, true,
+                true);
+        final DataLine.Info dataLineInfo = new DataLine.Info(
+                TargetDataLine.class, format);
+        TargetDataLine line;
+        line = (TargetDataLine) mixer.getLine(dataLineInfo);
+        final int numberOfSamples = bufferSize;
+        line.open(format, numberOfSamples);
+        line.start();
+        final AudioInputStream stream = new AudioInputStream(line);
+
+        JVMAudioInputStream audioStream = new JVMAudioInputStream(stream);
+        // create a new dispatcher
+        dispatcher = new AudioDispatcher(audioStream, bufferSize,
+                overlap);
+
+        // add a processor
+        dispatcher.addAudioProcessor(new PitchProcessor(algo, sampleRate, bufferSize, this));
+
+        new Thread(dispatcher,"Audio dispatching").start();
+    }
 
     public static void main(String... strings) throws LineUnavailableException, UnsupportedAudioFileException {
 //        PitchGenerator generator = new PitchGenerator();
@@ -149,6 +154,7 @@ public class PitchDetector implements PitchDetectionHandler {
 //
 //        byte[] seq=generator.createPitchSequence(500,0.9, pitchList.toArray(new Pitch[pitchList.size()])) ;
         PitchDetector pitchDetector = new PitchDetector();
+
 //        println("Printing mixers:");
 //        int i=0;
 //        for (Mixer.Info info : mixers) {
@@ -178,8 +184,8 @@ public class PitchDetector implements PitchDetectionHandler {
             float pitch = pitchDetectionResult.getPitch();
             float probability = pitchDetectionResult.getProbability();
             double rms = audioEvent.getRMS() * 100;
-//            String message = String.format("Pitch detected at %.2fs: %.2fHz ( %.2f probability, RMS: %.5f )\n", timeStamp,pitch,probability,rms);
-            String message = String.format("Pitch detected at %.2fs: %s (%.2f probability)\n", timeStamp, Pitch.fromFrequency(pitch).getName(), probability);
+            String message = String.format("Pitch detected at %.2fs: %.2fHz ( %.2f probability, RMS: %.5f )\n", timeStamp,pitch,probability,rms);
+            //String message = String.format("Pitch detected at %.2fs: %s (%.2f probability)\n", timeStamp, Pitch.fromFrequency(pitch).getName(), probability);
             println(message);
         }
     }
