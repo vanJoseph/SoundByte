@@ -9,10 +9,12 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
 import javax.sound.sampled.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 /**
- * This class uses the Tarsos DSP library to detect frequencies from a sound buffer or from a microphone.
+ * This class uses the Tarsos DSP library to detect frequencies from a sound buffer or from a microphone. Make sure the sample rate is the same from the generator and the Pitch detector or you migh get false results
  *
  * @author Donovan J. Wilder
  */
@@ -37,12 +39,13 @@ public class PitchDetector implements PitchDetectionHandler {
      */
     public PitchDetector(byte[] audioBuffer) throws LineUnavailableException, UnsupportedAudioFileException {
         println("Starting Pitch Detector");
-        Mixer.Info[] mixers=AudioSystem.getMixerInfo();
-        algo = PitchProcessor.PitchEstimationAlgorithm.DYNAMIC_WAVELET;
+        //Mixer.Info[] mixers=AudioSystem.getMixerInfo();
+        algo = PitchProcessor.PitchEstimationAlgorithm.YIN;
 
         processAudioBuffer(audioBuffer);
 
     }
+    //todo add way to enter the sample rate
 
     /**
      * Constructs a PitchDetector object that process audio from a microphone.
@@ -166,20 +169,20 @@ public class PitchDetector implements PitchDetectionHandler {
     }
 
     public static void main(String... strings) throws LineUnavailableException, UnsupportedAudioFileException {
-//        PitchGenerator generator = new PitchGenerator();
-//        List<Pitch> pitchList = new ArrayList<Pitch>();
-//        pitchList.add(Pitch.fromName("E4"));
-//        pitchList.add(Pitch.fromName("Ef4"));
-//        pitchList.add(Pitch.fromName("E4"));
-//        pitchList.add(Pitch.fromName("Ef4"));
-//        pitchList.add(Pitch.fromName("E4"));
-//        pitchList.add(Pitch.fromName("B3"));
-//        pitchList.add(Pitch.fromName("D4"));
-//        pitchList.add(Pitch.fromName("C4"));
-//        pitchList.add(Pitch.fromName("A3"));
-//
-//        byte[] seq=generator.createPitchSequence(500,0.9, pitchList.toArray(new Pitch[pitchList.size()])) ;
-        PitchDetector pitchDetector = new PitchDetector();
+        PitchGenerator generator = new PitchGenerator();
+        List<Pitch> pitchList = new ArrayList<Pitch>();
+        pitchList.add(Pitch.fromName("E4"));
+        pitchList.add(Pitch.fromName("Ef4"));
+        pitchList.add(Pitch.fromName("E4"));
+        pitchList.add(Pitch.fromName("Ef4"));
+        pitchList.add(Pitch.fromName("E4"));
+        pitchList.add(Pitch.fromName("B3"));
+        pitchList.add(Pitch.fromName("D4"));
+        pitchList.add(Pitch.fromName("C4"));
+        pitchList.add(Pitch.fromName("A3"));
+
+        byte[] seq=generator.createPitchSequence(500,0.9, pitchList.toArray(new Pitch[pitchList.size()])) ;
+        PitchDetector pitchDetector = new PitchDetector(seq);
 
 //        println("Printing mixers:");
 //        int i=0;
@@ -210,8 +213,8 @@ public class PitchDetector implements PitchDetectionHandler {
             float pitch = pitchDetectionResult.getPitch();
             float probability = pitchDetectionResult.getProbability();
             double rms = audioEvent.getRMS() * 100;
-            String message = String.format("Pitch detected at %.2fs: %.2fHz ( %.2f probability, RMS: %.5f )\n", timeStamp,pitch,probability,rms);
-            //String message = String.format("Pitch detected at %.2fs: %s (%.2f probability)\n", timeStamp, Pitch.fromFrequency(pitch).getName(), probability);
+            //String message = String.format("Pitch detected at %.2fs: %.2fHz ( %.2f probability, RMS: %.5f )\n", timeStamp,pitch,probability,rms);
+            String message = String.format("Pitch detected at %.2fs: %s (%.2f probability)\n", timeStamp, Pitch.fromFrequency(pitch).getName(), probability);
             println(message);
         }
     }
