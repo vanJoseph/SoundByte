@@ -39,63 +39,11 @@ public class PitchDetector implements PitchDetectionHandler {
      */
     public PitchDetector(byte[] audioBuffer) throws LineUnavailableException, UnsupportedAudioFileException {
         println("Starting Pitch Detector");
-        //Mixer.Info[] mixers=AudioSystem.getMixerInfo();
         algo = PitchProcessor.PitchEstimationAlgorithm.YIN;
-
         processAudioBuffer(audioBuffer);
-
     }
+
     //todo add way to enter the sample rate
-
-    /**
-     * Constructs a PitchDetector object that process audio from a microphone.
-     * @throws LineUnavailableException
-     * @throws UnsupportedAudioFileException
-     */
-    public PitchDetector() throws LineUnavailableException, UnsupportedAudioFileException {
-        println("Starting Pitch Detector");
-        Mixer.Info[] mixers=AudioSystem.getMixerInfo();
-        algo = PitchProcessor.PitchEstimationAlgorithm.YIN;
-
-        processFromMic(AudioSystem.getMixer(mixers[0]));
-       // processRecording(AudioSystem.getMixer(mixers[0]));
-    }
-
-
-    private void processRecording(Mixer mixer) throws LineUnavailableException,
-            UnsupportedAudioFileException {
-
-        if(dispatcher!= null){
-            dispatcher.stop();
-        }
-        currentMixer = mixer;
-
-        float sampleRate = 44100;
-        int bufferSize = 1024;
-        int overlap = 0;
-        println("Started listening with"+ mixer.getMixerInfo().getName() + "\n");
-
-        final AudioFormat format = new AudioFormat(sampleRate, 16, 1, true,
-                true);
-        final DataLine.Info dataLineInfo = new DataLine.Info(
-                TargetDataLine.class, format);
-        TargetDataLine line;
-        line = (TargetDataLine) mixer.getLine(dataLineInfo);
-        final int numberOfSamples = bufferSize;
-        line.open(format, numberOfSamples);
-        line.start();
-        final AudioInputStream stream = new AudioInputStream(line);
-
-        JVMAudioInputStream audioStream = new JVMAudioInputStream(stream);
-        // create a new dispatcher
-        dispatcher = new AudioDispatcher(audioStream, bufferSize,
-                overlap);
-
-        // add a processor
-        dispatcher.addAudioProcessor(new PitchProcessor(algo, sampleRate, bufferSize, this));
-
-        new Thread(dispatcher,"Audio dispatching").start();
-    }
 
     /**
      * Processes  frequencies from an audio buffer.
@@ -103,8 +51,7 @@ public class PitchDetector implements PitchDetectionHandler {
      * @throws LineUnavailableException
      * @throws UnsupportedAudioFileException
      */
-    private void processAudioBuffer(byte[] audioBuffer) throws LineUnavailableException,
-            UnsupportedAudioFileException {
+    private void processAudioBuffer(byte[] audioBuffer) throws UnsupportedAudioFileException {
 
         if(dispatcher!= null){
             dispatcher.stop();
@@ -184,14 +131,7 @@ public class PitchDetector implements PitchDetectionHandler {
         byte[] seq=generator.createPitchSequence(500,0.9, pitchList.toArray(new Pitch[pitchList.size()])) ;
         PitchDetector pitchDetector = new PitchDetector(seq);
 
-//        println("Printing mixers:");
-//        int i=0;
-//        for (Mixer.Info info : mixers) {
-//            println("Name["+ i++ + "]:"+info.getName() +"\n\t"
-//            + "Description: "+info.getDescription()+ "\n\t"
-//            + "Vendor: "+ info.getVendor()+ "\n\t"
-//            + "Version: "+info.getVersion()+"\n");
-//        }
+
         Scanner sc = new Scanner(System.in);
 
         while (true) {
