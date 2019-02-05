@@ -9,12 +9,12 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
 import javax.sound.sampled.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 /**
  * This class uses the Tarsos DSP library to detect frequencies from a sound buffer or from a microphone.
+ *
+ * @author Donovan J. Wilder
  */
 public class PitchDetector implements PitchDetectionHandler {
 
@@ -27,6 +27,14 @@ public class PitchDetector implements PitchDetectionHandler {
         System.out.println(message);
 
     }
+
+    /**
+     * Construct a PitchDetector object that process audio from a buffer.
+     *
+     * @param audioBuffer a buffer of sound
+     * @throws LineUnavailableException
+     * @throws UnsupportedAudioFileException
+     */
     public PitchDetector(byte[] audioBuffer) throws LineUnavailableException, UnsupportedAudioFileException {
         println("Starting Pitch Detector");
         Mixer.Info[] mixers=AudioSystem.getMixerInfo();
@@ -35,15 +43,20 @@ public class PitchDetector implements PitchDetectionHandler {
         processAudioBuffer(audioBuffer);
 
     }
+
+    /**
+     * Constructs a PitchDetector object that process audio from a microphone.
+     * @throws LineUnavailableException
+     * @throws UnsupportedAudioFileException
+     */
     public PitchDetector() throws LineUnavailableException, UnsupportedAudioFileException {
         println("Starting Pitch Detector");
         Mixer.Info[] mixers=AudioSystem.getMixerInfo();
         algo = PitchProcessor.PitchEstimationAlgorithm.YIN;
 
-        detectFromMic(AudioSystem.getMixer(mixers[0]));
+        processFromMic(AudioSystem.getMixer(mixers[0]));
        // processRecording(AudioSystem.getMixer(mixers[0]));
     }
-
 
 
     private void processRecording(Mixer mixer) throws LineUnavailableException,
@@ -81,6 +94,12 @@ public class PitchDetector implements PitchDetectionHandler {
         new Thread(dispatcher,"Audio dispatching").start();
     }
 
+    /**
+     * Processes  frequencies from an audio buffer.
+     * @param audioBuffer
+     * @throws LineUnavailableException
+     * @throws UnsupportedAudioFileException
+     */
     private void processAudioBuffer(byte[] audioBuffer) throws LineUnavailableException,
             UnsupportedAudioFileException {
 
@@ -103,7 +122,14 @@ public class PitchDetector implements PitchDetectionHandler {
 
         new Thread(dispatcher,"Audio dispatching").start();
     }
-    private void detectFromMic(Mixer mixer) throws LineUnavailableException {
+
+    /**
+     * Detect the frequencies from the microphone.
+     *
+     * @param mixer the mic that you want to use
+     * @throws LineUnavailableException
+     */
+    private void processFromMic(Mixer mixer) throws LineUnavailableException {
 
         if(dispatcher!= null){
             dispatcher.stop();
