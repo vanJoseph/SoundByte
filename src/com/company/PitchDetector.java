@@ -37,7 +37,7 @@ public class PitchDetector implements PitchDetectionHandler {
      * @throws LineUnavailableException
      * @throws UnsupportedAudioFileException
      */
-    public PitchDetector(byte[] audioBuffer) throws LineUnavailableException, UnsupportedAudioFileException {
+    public PitchDetector(byte[] audioBuffer) throws UnsupportedAudioFileException {
         println("Starting Pitch Detector");
         algo = PitchProcessor.PitchEstimationAlgorithm.YIN;
         processAudioBuffer(audioBuffer);
@@ -115,7 +115,7 @@ public class PitchDetector implements PitchDetectionHandler {
         new Thread(dispatcher,"Audio dispatching").start();
     }
 
-    public static void main(String... strings) throws LineUnavailableException, UnsupportedAudioFileException {
+    public static void main(String... strings) throws UnsupportedAudioFileException {
         PitchGenerator generator = new PitchGenerator();
         List<Pitch> pitchList = new ArrayList<Pitch>();
         pitchList.add(Pitch.fromName("E4"));
