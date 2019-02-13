@@ -43,6 +43,13 @@ public class PitchDetector implements PitchDetectionHandler {
         processAudioBuffer(audioBuffer);
     }
 
+    private List<PitchModel> pitchList;
+    public PitchDetector(byte[] audioBuffer, List<PitchModel> pitchList) throws UnsupportedAudioFileException{
+        this(audioBuffer);
+        this.pitchList=pitchList;
+
+    }
+
     //todo add way to enter the sample rate
 
     /**
@@ -146,6 +153,11 @@ public class PitchDetector implements PitchDetectionHandler {
     }
 
 
+    /**
+     * if the object was constructed with a List it will record the PitchDetectionResults into the pitchList List.
+     * @param pitchDetectionResult
+     * @param audioEvent
+     */
     @Override
     public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
         if(pitchDetectionResult.getPitch() != -1){
@@ -153,6 +165,9 @@ public class PitchDetector implements PitchDetectionHandler {
             float pitch = pitchDetectionResult.getPitch();
             float probability = pitchDetectionResult.getProbability();
             double rms = audioEvent.getRMS() * 100;
+            if (pitchList != null) {
+                pitchList.add(new PitchModel(timeStamp, pitch, probability));
+            }
             //String message = String.format("Pitch detected at %.2fs: %.2fHz ( %.2f probability, RMS: %.5f )\n", timeStamp,pitch,probability,rms);
             String message = String.format("Pitch detected at %.2fs: %s (%.2f probability)\n", timeStamp, Pitch.fromFrequency(pitch).getName(), probability);
             println(message);
