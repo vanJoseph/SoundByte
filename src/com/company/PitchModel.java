@@ -25,6 +25,6 @@ public class PitchModel {
 
     @Override
     public String toString() {
-        return "Timestamp: "+getTimeStamp()+" Pitch: "+getPitch()+ "Probability: "+getProbability();
+        return "Timestamp: "+getTimeStamp()+" Pitch: "+getPitch()+ " Probability: "+getProbability();
     }
 }
