@@ -44,9 +44,12 @@ public class PitchDetector implements PitchDetectionHandler {
     }
 
     private List<PitchModel> pitchList;
-    public PitchDetector(byte[] audioBuffer, List<PitchModel> pitchList) throws UnsupportedAudioFileException{
-        this(audioBuffer);
+    public PitchDetector(List<PitchModel> pitchList) throws UnsupportedAudioFileException, LineUnavailableException{
         this.pitchList=pitchList;
+        Mixer.Info[] mixerInfos=AudioSystem.getMixerInfo();
+        algo = PitchProcessor.PitchEstimationAlgorithm.YIN;
+        Mixer mixer = AudioSystem.getMixer(mixerInfos[0]);
+        processFromMic(mixer);
 
     }
 
@@ -80,6 +83,7 @@ public class PitchDetector implements PitchDetectionHandler {
         new Thread(dispatcher,"Audio dispatching").start();
     }
 
+    private Thread micProcessThread;
     /**
      * Detect the frequencies from the microphone.
      *
@@ -94,7 +98,7 @@ public class PitchDetector implements PitchDetectionHandler {
         currentMixer = mixer;
 
         float sampleRate = 44100;
-        int bufferSize = 1024;
+        int bufferSize = 512;
 
 
         int overlap = 0;
@@ -119,10 +123,11 @@ public class PitchDetector implements PitchDetectionHandler {
         // add a processor
         dispatcher.addAudioProcessor(new PitchProcessor(algo, sampleRate, bufferSize, this));
 
-        new Thread(dispatcher,"Audio dispatching").start();
+        micProcessThread=new Thread(dispatcher,"Audio dispatching");
+        micProcessThread.start();
     }
 
-    public static void main(String... strings) throws UnsupportedAudioFileException {
+    public static void main(String... strings) throws UnsupportedAudioFileException, LineUnavailableException {
         PitchGenerator generator = new PitchGenerator();
         List<Pitch> pitchList = new ArrayList<Pitch>();
         pitchList.add(Pitch.fromName("E4"));
@@ -136,7 +141,8 @@ public class PitchDetector implements PitchDetectionHandler {
         pitchList.add(Pitch.fromName("A3"));
 
         byte[] seq=generator.createPitchSequence(500,0.9, pitchList.toArray(new Pitch[pitchList.size()])) ;
-        PitchDetector pitchDetector = new PitchDetector(seq);
+        List<PitchModel> pitchModels = new ArrayList<>();
+        PitchDetector pitchDetector = new PitchDetector(pitchModels);
 
 
         Scanner sc = new Scanner(System.in);
@@ -145,10 +151,18 @@ public class PitchDetector implements PitchDetectionHandler {
             System.out.println("4. exit");
             int c = sc.nextInt();
             if (c == 4)
+
+
+
+
+
                 break;
         }
         pitchDetector.dispatcher.stop();
-
+        System.out.println("The dispatcher is stopped.");
+        for (PitchModel model : pitchModels) {
+            println(model.toString());
+        }
         System.out.print("Done");
     }
 
@@ -167,7 +181,7 @@ public class PitchDetector implements PitchDetectionHandler {
             double rms = audioEvent.getRMS() * 100;
             if (pitchList != null) {
                 pitchList.add(new PitchModel(timeStamp, pitch, probability));
-            }
+        }
             //String message = String.format("Pitch detected at %.2fs: %.2fHz ( %.2f probability, RMS: %.5f )\n", timeStamp,pitch,probability,rms);
             String message = String.format("Pitch detected at %.2fs: %s (%.2f probability)\n", timeStamp, Pitch.fromFrequency(pitch).getName(), probability);
             println(message);
