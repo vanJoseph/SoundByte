@@ -1,4 +1,4 @@
-package com.company;
+package com.donovanwilder.soundbyte;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;

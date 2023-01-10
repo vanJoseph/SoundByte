@@ -1,7 +1,6 @@
-package com.company;
+package com.donovanwilder.soundbyte;
 
 import javax.sound.sampled.LineUnavailableException;
-import java.util.List;
 
 public class TestingGrounds {
     public static void main(String[] args) throws LineUnavailableException {

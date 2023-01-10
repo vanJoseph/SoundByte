@@ -1,4 +1,4 @@
-package com.company;
+package com.donovanwilder.soundbyte;
 
 import javax.sound.sampled.*;
 import java.io.File;

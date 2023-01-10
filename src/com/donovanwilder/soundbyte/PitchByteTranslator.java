@@ -1,4 +1,4 @@
-package com.company;
+package com.donovanwilder.soundbyte;
 
 import java.util.ArrayList;
 import java.util.List;

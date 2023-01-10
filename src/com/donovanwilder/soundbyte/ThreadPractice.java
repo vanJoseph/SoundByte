@@ -1,4 +1,4 @@
-package com.company;
+package com.donovanwilder.soundbyte;
 
 public class ThreadPractice implements Runnable {
 
@@ -20,8 +20,8 @@ public class ThreadPractice implements Runnable {
         ThreadPractice practice = new ThreadPractice();
         PitchGenerator generator = new PitchGenerator();
         Thread thread = new Thread(practice, "practice");
-        thread.
-        thread.start();
+//Fixme        thread.
+//        thread.start();
 
     }
 

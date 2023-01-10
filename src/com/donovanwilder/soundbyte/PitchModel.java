@@ -1,4 +1,4 @@
-package com.company;
+package com.donovanwilder.soundbyte;
 
 public class PitchModel {
     private double timeStamp;
